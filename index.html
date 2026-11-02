@@ -50,7 +50,8 @@ details{margin-top:16px;background:#111a2a;border:1px solid var(--line);border-r
 <p class="muted" style="font-size:11px;margin:15px 2px">Unofficial community tool. Not affiliated with MEXC. Market data availability depends on MEXC public endpoints and regional access.</p>
 </main>
 <script>
-const API='https://contract.mexc.com';
+// After deploying the Cloudflare Worker, replace this URL with your Worker URL.
+const API='https://mexc-market-proxy.b4all4ever.workers.dev';
 const $=id=>document.getElementById(id);
 let contracts=[], rows=[], busy=false, auto=true, timer=null;
 const fmtPrice=n=>!Number.isFinite(n)?'—':n>=1000?n.toLocaleString(undefined,{maximumFractionDigits:2}):n>=1?n.toLocaleString(undefined,{maximumFractionDigits:4}):n>=.01?n.toLocaleString(undefined,{maximumFractionDigits:6}):n.toPrecision(5);
@@ -111,7 +112,7 @@ async function runScan(){
   // Bounded concurrency avoids flooding public endpoints.
   let idx=0,done=0,fail=0;const workers=Array.from({length:8},async()=>{while(idx<all.length){const x=all[idx++];try{const r=await scanOne(x.c,x.t);if(r){r.hot=hotSet.has(r.symbol);rows.push(r)}}catch(e){fail++}done++;if(done%25===0)$('status').textContent=`Scanning candles… ${done}/${all.length}`;}});
   await Promise.all(workers);render();$('dot').classList.add('live');$('status').textContent=`Scan complete · ${rows.length} contracts with candle data${fail?` · ${fail} skipped`:''}`;$('updated').textContent='Last update: '+new Date().toLocaleString();
- }catch(e){$('status').textContent='Could not load MEXC data: '+e.message;$('rows').innerHTML=`<tr><td colspan="8" class="empty">The browser could not access MEXC public API.<br><br>Try again, or use the hosting instructions to add a free proxy.</td></tr>`}
+ }catch(e){$('status').textContent='Could not load MEXC data: '+e.message;$('rows').innerHTML=`<tr><td colspan="8" class="empty">Could not reach the market-data proxy.<br><br>Check that the Cloudflare Worker URL has been added to index.html and deployed.</td></tr>`}
  finally{busy=false;$('scanBtn').disabled=false}
 }
 function schedule(){if(timer)clearInterval(timer);if(auto)timer=setInterval(runScan,60000)}

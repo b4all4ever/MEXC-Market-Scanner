@@ -12,7 +12,7 @@ main{max-width:1440px;margin:auto;padding:24px}.top{display:flex;align-items:cen
 button,select,input{background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--text);padding:10px 12px;font:inherit}button{cursor:pointer}button.primary{background:#1d5b49;border-color:#287c62}button:hover{filter:brightness(1.15)}
 .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:14px}.card,.panel{background:linear-gradient(145deg,#141e31,#101827);border:1px solid var(--line);border-radius:14px}.card{padding:16px}.label{font-size:12px;color:var(--muted)}.big{font-size:25px;font-weight:700;margin-top:5px}.green{color:var(--green)}.red{color:var(--red)}.yellow{color:var(--yellow)}
 .toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:13px;border-bottom:1px solid var(--line)}.toolbar input{min-width:180px;flex:1}.status{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--yellow);display:inline-block}.dot.live{background:var(--green)}
-.panel{overflow:hidden}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:820px}th,td{text-align:left;padding:13px 15px;border-bottom:1px solid #202c40;white-space:nowrap}th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:#111a2a}tbody tr:hover{background:#172238}tbody tr:last-child td{border-bottom:0}.coin{font-weight:700}.pair{font-size:11px;color:var(--muted);font-weight:400}.pill{display:inline-block;border-radius:6px;padding:4px 7px;font-size:11px;font-weight:700}.long{background:#153d32;color:var(--green)}.short{background:#45202c;color:var(--red)}.hot{background:#473719;color:var(--yellow)}.wait{background:#26334a;color:#aab9d2}.empty{padding:34px;text-align:center;color:var(--muted)}.footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px;color:var(--muted);font-size:12px}
+.panel{overflow:hidden}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1320px}th,td{text-align:left;padding:13px 15px;border-bottom:1px solid #202c40;white-space:nowrap}th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:#111a2a}tbody tr:hover{background:#172238}tbody tr:last-child td{border-bottom:0}.coin{font-weight:700}.pair{font-size:11px;color:var(--muted);font-weight:400}.pill{display:inline-block;border-radius:6px;padding:4px 7px;font-size:11px;font-weight:700}.long{background:#153d32;color:var(--green)}.short{background:#45202c;color:var(--red)}.hot{background:#473719;color:var(--yellow)}.wait{background:#26334a;color:#aab9d2}.empty{padding:34px;text-align:center;color:var(--muted)}.footer{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px;color:var(--muted);font-size:12px}
 details{margin-top:16px;background:#111a2a;border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--muted)}summary{color:var(--text);cursor:pointer;font-weight:650}details li{margin:7px 0}.notice{color:#d6e2f5;background:#18263c;border-left:3px solid var(--blue);padding:12px;border-radius:6px;margin:14px 0;font-size:12px}
 @media(max-width:800px){main{padding:14px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}h1{font-size:19px}.big{font-size:22px}}
 </style>
@@ -36,17 +36,39 @@ details{margin-top:16px;background:#111a2a;border:1px solid var(--line);border-r
   <select id="sort"><option value="signal">Sort: Signal first</option><option value="change">Sort: 24h change</option><option value="volume">Sort: 24h volume</option><option value="symbol">Sort: Coin name</option></select>
   <div class="status"><span class="dot" id="dot"></span><span id="status">Connecting to MEXC public market data…</span></div>
  </div>
- <div class="tablewrap"><table><thead><tr><th>Coin / Contract</th><th>Last price</th><th>24h change</th><th>24h turnover</th><th>EMA 20 / 50</th><th>Signal</th><th>Setup detail</th><th>Chart</th></tr></thead><tbody id="rows"><tr><td colspan="8" class="empty">Loading market data…</td></tr></tbody></table></div>
+ <div class="tablewrap"><table><thead><tr>
+ <th>Coin / Contract</th>
+ <th>Last price</th>
+ <th>24h change</th>
+ <th>24h turnover</th>
+ <th>EMA 20 / 50</th>
+ <th>Signal</th>
+ <th>Entry</th>
+ <th>Stop Loss</th>
+ <th>TP1 (1.5R)</th>
+ <th>TP2 (2.5R)</th>
+ <th>Setup detail</th>
+ <th>Chart</th>
+</tr></thead><tbody id="rows"><tr><td colspan="12" class="empty">Loading market data…</td></tr></tbody></table></div>
  <div class="footer"><span id="updated">Last update: —</span><span>Auto refresh every 60 seconds · 30m candles</span></div>
 </section>
 <details><summary>Scanner rules and troubleshooting</summary>
 <ul>
-<li><b>LONG:</b> last completed 30m candle has EMA20 above EMA50; bullish cross is within the last 6 completed candles; price retests the EMA area; confirmation candle closes bullish above EMA20; RSI(14) is above 50; volume is at least 1.5× the previous 20-candle average.</li>
-<li><b>SHORT:</b> opposite conditions; RSI(14) below 50; volume at least 1.5× the previous 20-candle average.</li><li><b>Candle strength:</b> confirmation candle body must be at least 35% of its range and close in the upper 35% (LONG) or lower 35% (SHORT) of its range.</li>
-<li><b>HOT:</b> relative 24h turnover and/or price movement ranks near the active end of the currently loaded market.</li>
-<li>Retest tolerances are designed as a practical starting point; signals can be scarce. HOT is a relative ranking, not a prediction.</li>
-<li>Chart links open TradingView using the matching MEXC USDT perpetual symbol and 30-minute interval. If TradingView does not list that exact contract, search the symbol inside TradingView.</li><li>If data does not load, check the Cloudflare Worker URL and its public API response.</li>
-</ul></details>
+<li><b>LONG:</b> 30m EMA20 above EMA50, recent bullish cross, retest in the previous 1–4 completed candles, and strong bullish confirmation.</li>
+
+<li><b>SHORT:</b> Opposite EMA cross, recent retest and strong bearish confirmation.</li>
+
+<li><b>1H trend:</b> LONG requires 1H close above a rising EMA50. SHORT requires 1H close below a falling EMA50.</li>
+
+<li><b>Sideways filter:</b> ADX(14) must be at least 18 and EMA20/EMA50 separation at least 0.08%.</li>
+
+<li><b>Volume:</b> Current completed 30m candle volume must be at least 1.5× the previous 20 completed candles' average.</li>
+
+<li><b>Trade plan:</b> Entry is the confirmation candle close. SL is beyond the retest swing with a 0.20 ATR buffer. TP1 = 1.5R and TP2 = 2.5R.</li>
+
+<li><b>HOT:</b> Relative 24h turnover and/or absolute price movement ranks near the active end of the currently loaded market.</li>
+
+<li><b>Chart:</b> TradingView links open the matching MEXC USDT perpetual symbol at the 30-minute interval.</li></ul></details>
 <p class="muted" style="font-size:11px;margin:15px 2px">Unofficial community tool. Not affiliated with MEXC. Market data availability depends on MEXC public endpoints and regional access.</p>
 </main>
 <script>
@@ -59,86 +81,347 @@ const fmtVol=n=>!Number.isFinite(n)?'—':n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(
 const pct=n=>(n>=0?'+':'')+n.toFixed(2)+'%';
 async function getJson(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);const j=await r.json();if(j.success===false)throw Error(j.code||'API error');return j.data;}
 function ema(vals,period){let k=2/(period+1),out=[],v=vals[0];out.push(v);for(let i=1;i<vals.length;i++){v=vals[i]*k+v*(1-k);out.push(v)}return out}
-function rsiWilder(vals,period=14){
- const out=Array(vals.length).fill(NaN);
- if(vals.length<=period)return out;
- let gain=0,loss=0;
- for(let i=1;i<=period;i++){const d=vals[i]-vals[i-1];gain+=Math.max(d,0);loss+=Math.max(-d,0);}
- let avgG=gain/period,avgL=loss/period;
- out[period]=avgL===0?100:100-(100/(1+avgG/avgL));
- for(let i=period+1;i<vals.length;i++){
-  const d=vals[i]-vals[i-1];
-  avgG=(avgG*(period-1)+Math.max(d,0))/period;
-  avgL=(avgL*(period-1)+Math.max(-d,0))/period;
-  out[i]=avgL===0?100:100-(100/(1+avgG/avgL));
- }
- return out;
-}
 function sma(vals,period,endExclusive){
  const a=vals.slice(Math.max(0,endExclusive-period),endExclusive);
  return a.length?a.reduce((x,y)=>x+y,0)/a.length:NaN;
 }
-async function scanOne(c,ticker){
- const raw=await getJson(`${API}/api/v1/contract/kline/${encodeURIComponent(c.symbol)}?interval=Min30&limit=120`);
- const ts=raw.time||[],cl=raw.close||[],hi=raw.high||[],lo=raw.low||[],op=raw.open||[],vol=raw.vol||raw.volume||[];
- if(cl.length<60||hi.length!==cl.length||lo.length!==cl.length||vol.length!==cl.length)return null;
- const now=Math.floor(Date.now()/1000),lastTime=Number(ts[ts.length-1]);
+function atrSeries(high,low,close,period=14){
+ const n=close.length,out=Array(n).fill(NaN),tr=Array(n).fill(0);
+ for(let i=1;i<n;i++){
+  tr[i]=Math.max(
+   high[i]-low[i],
+   Math.abs(high[i]-close[i-1]),
+   Math.abs(low[i]-close[i-1])
+  );
+ }
+ if(n<=period)return out;
+ let sum=0;
+ for(let i=1;i<=period;i++)sum+=tr[i];
+ let prev=sum/period;
+ out[period]=prev;
+ for(let i=period+1;i<n;i++){
+  prev=(prev*(period-1)+tr[i])/period;
+  out[i]=prev;
+ }
+ return out;
+}
+
+function adxSeries(high,low,close,period=14){
+ const n=close.length;
+ const out=Array(n).fill(NaN);
+ const tr=Array(n).fill(0);
+ const plusDM=Array(n).fill(0);
+ const minusDM=Array(n).fill(0);
+
+ for(let i=1;i<n;i++){
+  const up=high[i]-high[i-1];
+  const down=low[i-1]-low[i];
+
+  plusDM[i]=up>down&&up>0?up:0;
+  minusDM[i]=down>up&&down>0?down:0;
+
+  tr[i]=Math.max(
+   high[i]-low[i],
+   Math.abs(high[i]-close[i-1]),
+   Math.abs(low[i]-close[i-1])
+  );
+ }
+
+ if(n<period*2+1)return out;
+
+ let smTR=0,smPlus=0,smMinus=0;
+ for(let i=1;i<=period;i++){
+  smTR+=tr[i];
+  smPlus+=plusDM[i];
+  smMinus+=minusDM[i];
+ }
+
+ const dx=Array(n).fill(NaN);
+
+ for(let i=period;i<n;i++){
+  if(i>period){
+   smTR=smTR-smTR/period+tr[i];
+   smPlus=smPlus-smPlus/period+plusDM[i];
+   smMinus=smMinus-smMinus/period+minusDM[i];
+  }
+
+  const pdi=smTR>0?100*smPlus/smTR:0;
+  const mdi=smTR>0?100*smMinus/smTR:0;
+  const total=pdi+mdi;
+
+  dx[i]=total>0?100*Math.abs(pdi-mdi)/total:0;
+ }
+
+ const first=period*2-1;
+ let adxSum=0;
+
+ for(let i=period;i<=first;i++){
+  if(Number.isFinite(dx[i]))adxSum+=dx[i];
+ }
+
+ out[first]=adxSum/period;
+ let prev=out[first];
+
+ for(let i=first+1;i<n;i++){
+  prev=(prev*(period-1)+dx[i])/period;
+  out[i]=prev;
+ }
+
+ return out;
+}
+
+ async function scanOne(c,ticker){
+ const raw=await getJson(
+  `${API}/api/v1/contract/kline/${encodeURIComponent(c.symbol)}?interval=Min30&limit=120`
+ );
+
+ const ts=raw.time||[];
+ const cl=raw.close||[];
+ const hi=raw.high||[];
+ const lo=raw.low||[];
+ const op=raw.open||[];
+ const vol=raw.vol||raw.volume||[];
+
+ if(cl.length<60||hi.length!==cl.length||lo.length!==cl.length||
+    op.length!==cl.length||vol.length!==cl.length||ts.length!==cl.length)return null;
+
+ const now=Math.floor(Date.now()/1000);
+ const lastTime=Number(ts[ts.length-1]);
  const n=(now<lastTime+1800?cl.length-1:cl.length);
+
  if(n<55)return null;
- const close=cl.slice(0,n).map(Number),high=hi.slice(0,n).map(Number),low=lo.slice(0,n).map(Number),open=op.slice(0,n).map(Number),volume=vol.slice(0,n).map(Number);
- const e20=ema(close,20),e50=ema(close,50),rsi=rsiWilder(close,14),i=n-1;
+
+ const close=cl.slice(0,n).map(Number);
+ const high=hi.slice(0,n).map(Number);
+ const low=lo.slice(0,n).map(Number);
+ const open=op.slice(0,n).map(Number);
+ const volume=vol.slice(0,n).map(Number);
+
+ const e20=ema(close,20);
+ const e50=ema(close,50);
+ const adx=adxSeries(high,low,close,14);
+ const atr=atrSeries(high,low,close,14);
+ const i=n-1;
+
  let crossUp=-1,crossDn=-1;
+
  for(let k=Math.max(1,i-6);k<=i;k++){
   if(e20[k]>e50[k]&&e20[k-1]<=e50[k-1])crossUp=k;
   if(e20[k]<e50[k]&&e20[k-1]>=e50[k-1])crossDn=k;
  }
- const avgVol=sma(volume,20,i),volRatio=avgVol>0?volume[i]/avgVol:0;
- const candleRange=high[i]-low[i],body=Math.abs(close[i]-open[i]);
- const bullish=close[i]>close[i-1]&&close[i]>e20[i]&&candleRange>0&&close[i]>=low[i]+candleRange*.65&&body/candleRange>=.35;
- const bearish=close[i]<close[i-1]&&close[i]<e20[i]&&candleRange>0&&close[i]<=low[i]+candleRange*.35&&body/candleRange>=.35;
+
+ const avgVol=sma(volume,20,i);
+ const volRatio=avgVol>0?volume[i]/avgVol:0;
  const volumeOK=volRatio>=1.5;
- let signal='WAIT',detail='No confirmed cross + retest';
- const wasRetested=from=>{
-  for(let k=from+1;k<=i;k++){
-   const top=Math.max(e20[k],e50[k])*1.003,bottom=Math.min(e20[k],e50[k])*.997;
-   if(low[k]<=top&&high[k]>=bottom)return true;
+
+ const candleRange=high[i]-low[i];
+ const body=Math.abs(close[i]-open[i]);
+
+ const bullish=
+  close[i]>close[i-1]&&
+  close[i]>e20[i]&&
+  candleRange>0&&
+  close[i]>=low[i]+candleRange*.65&&
+  body/candleRange>=.35;
+
+ const bearish=
+  close[i]<close[i-1]&&
+  close[i]<e20[i]&&
+  candleRange>0&&
+  close[i]<=low[i]+candleRange*.35&&
+  body/candleRange>=.35;
+
+ const gapPct=close[i]>0?
+  Math.abs(e20[i]-e50[i])/close[i]*100:0;
+
+ const adxOK=Number.isFinite(adx[i])&&adx[i]>=18;
+ const gapOK=gapPct>=.08;
+
+ let signal='WAIT';
+ let detail='No recent EMA20/50 cross';
+ let entry=null,sl=null,tp1=null,tp2=null;
+
+ const findRecentRetest=from=>{
+  const start=Math.max(from+1,i-4);
+  for(let k=i-1;k>=start;k--){
+   const top=Math.max(e20[k],e50[k])*1.003;
+   const bottom=Math.min(e20[k],e50[k])*.997;
+
+   if(low[k]<=top&&high[k]>=bottom){
+    return {index:k,low:low[k],high:high[k]};
+   }
   }
-  return false;
+  return null;
  };
+
+ let direction=null,cross=-1;
+
  if(e20[i]>e50[i]&&crossUp>0&&i>crossUp){
-  if(wasRetested(crossUp)&&bullish&&rsi[i]>50&&volumeOK){
-   signal='LONG';detail=`Bullish cross + retest · RSI ${rsi[i].toFixed(1)} · Vol ${volRatio.toFixed(2)}×`;
-  }else{
-   const reasons=[];
-   if(!wasRetested(crossUp))reasons.push('no retest');
-   if(!bullish)reasons.push('weak candle');
-   if(!(rsi[i]>50))reasons.push('RSI ≤ 50');
-   if(!volumeOK)reasons.push('volume < 1.5×');
-   detail='Cross found; waiting: '+reasons.join(', ');
-  }
+  direction='LONG';
+  cross=crossUp;
  }else if(e20[i]<e50[i]&&crossDn>0&&i>crossDn){
-  if(wasRetested(crossDn)&&bearish&&rsi[i]<50&&volumeOK){
-   signal='SHORT';detail=`Bearish cross + retest · RSI ${rsi[i].toFixed(1)} · Vol ${volRatio.toFixed(2)}×`;
+  direction='SHORT';
+  cross=crossDn;
+ }
+
+ if(direction){
+  const retest=findRecentRetest(cross);
+  const candleOK=direction==='LONG'?bullish:bearish;
+
+  const reasons=[];
+
+  if(!retest)reasons.push('no retest in last 1–4 candles');
+  if(!candleOK)reasons.push('weak confirmation candle');
+  if(!volumeOK)reasons.push('volume below 1.5×');
+  if(!adxOK)reasons.push('ADX below 18');
+  if(!gapOK)reasons.push('EMA gap below 0.08%');
+
+  // 1H data is requested only when the 30m setup passes its filters.
+  if(retest&&candleOK&&volumeOK&&adxOK&&gapOK){
+   const hraw=await getJson(
+    `${API}/api/v1/contract/kline/${encodeURIComponent(c.symbol)}?interval=Min60&limit=100`
+   );
+
+   const hts=hraw.time||[];
+   const hc=hraw.close||[];
+
+   if(hc.length>=55&&hts.length===hc.length){
+    const hLastTime=Number(hts[hts.length-1]);
+    const hn=(now<hLastTime+3600?hc.length-1:hc.length);
+
+    if(hn>=55){
+     const hclose=hc.slice(0,hn).map(Number);
+     const he50=ema(hclose,50);
+     const hi=hn-1;
+
+     const trendLong=
+      hclose[hi]>he50[hi]&&
+      he50[hi]>he50[hi-1];
+
+     const trendShort=
+      hclose[hi]<he50[hi]&&
+      he50[hi]<he50[hi-1];
+
+     const trendOK=direction==='LONG'?trendLong:trendShort;
+
+     if(!trendOK){
+      reasons.push('1H trend not confirmed');
+     }else{
+      const atrNow=atr[i];
+      const buffer=atrNow*.20;
+      const riskEntry=close[i];
+
+      if(Number.isFinite(atrNow)&&atrNow>0){
+       if(direction==='LONG'){
+        const stop=retest.low-buffer;
+        const risk=riskEntry-stop;
+
+        if(risk>0){
+         signal='LONG';
+         entry=riskEntry;
+         sl=stop;
+         tp1=entry+risk*1.5;
+         tp2=entry+risk*2.5;
+        }
+       }else{
+        const stop=retest.high+buffer;
+        const risk=stop-riskEntry;
+
+        if(risk>0){
+         signal='SHORT';
+         entry=riskEntry;
+         sl=stop;
+         tp1=entry-risk*1.5;
+         tp2=entry-risk*2.5;
+        }
+       }
+      }
+      if(signal==='WAIT')reasons.push('invalid risk/ATR calculation');
+     }
+    }else{
+     reasons.push('insufficient closed 1H candles');
+    }
+   }else{
+    reasons.push('1H candle data unavailable');
+   }
+  }
+
+  if(signal!=='WAIT'){
+   detail=`${direction} · Retest ${i-retest.index} candle(s) ago · 1H trend OK · ADX ${adx[i].toFixed(1)} · Gap ${gapPct.toFixed(3)}% · Vol ${volRatio.toFixed(2)}×`;
   }else{
-   const reasons=[];
-   if(!wasRetested(crossDn))reasons.push('no retest');
-   if(!bearish)reasons.push('weak candle');
-   if(!(rsi[i]<50))reasons.push('RSI ≥ 50');
-   if(!volumeOK)reasons.push('volume < 1.5×');
-   detail='Cross found; waiting: '+reasons.join(', ');
+   detail='Waiting: '+reasons.join(', ');
   }
  }
+
  const price=Number(ticker.lastPrice||ticker.last||close[i]);
- const change=Number(ticker.riseFallRate ?? ticker.changeRate ?? 0)*100;
+ const change=Number(ticker.riseFallRate??ticker.changeRate??0)*100;
  const turnover=Number(ticker.amount24||ticker.turnover24||ticker.volume24||0);
- return {symbol:c.symbol,base:c.baseCoin||c.symbol.replace('_USDT',''),price,change,turnover,e20:e20[i],e50:e50[i],rsi:rsi[i],volRatio,signal,detail};
+
+ return {
+  symbol:c.symbol,
+  base:c.baseCoin||c.symbol.replace('_USDT',''),
+  price,change,turnover,
+  e20:e20[i],e50:e50[i],
+  adx:adx[i],gapPct,volRatio,
+  signal,detail,entry,sl,tp1,tp2
+ };
 }
-function render(){
- const q=$('search').value.trim().toUpperCase(),f=$('filter').value,s=$('sort').value;
- let arr=rows.filter(r=>(!q||r.symbol.includes(q)||r.base.includes(q))&&(f==='ALL'||(f==='HOT'&&r.hot)||(f===r.signal)));
- arr.sort((a,b)=>s==='change'?b.change-a.change:s==='volume'?b.turnover-a.turnover:s==='symbol'?a.symbol.localeCompare(b.symbol):rank(b)-rank(a));
- $('rows').innerHTML=arr.length?arr.map(r=>`<tr><td><span class="coin">${r.base}</span> <span class="pair">${r.symbol}</span></td><td>${fmtPrice(r.price)}</td><td class="${r.change>=0?'green':'red'}">${pct(r.change)}</td><td>$${fmtVol(r.turnover)}</td><td><span class="${r.e20>r.e50?'green':'red'}">${fmtPrice(r.e20)}</span> / <span>${fmtPrice(r.e50)}</span></td><td>${r.signal==='LONG'?'<span class="pill long">LONG</span>':r.signal==='SHORT'?'<span class="pill short">SHORT</span>':'<span class="pill wait">WAIT</span>'} ${r.hot?'<span class="pill hot">HOT</span>':''}</td><td>${r.detail}</td><td><a style="color:#91b9ff" href="https://www.tradingview.com/chart/?symbol=${encodeURIComponent('MEXC:'+r.symbol.replace('_','')+'.P')}&interval=30" target="_blank" rel="noopener">TradingView ↗</a></td></tr>`).join(''):'<tr><td colspan="8" class="empty">No coins match this filter.</td></tr>';
- $('total').textContent=rows.length;$('hotCount').textContent=rows.filter(x=>x.hot).length;$('longCount').textContent=rows.filter(x=>x.signal==='LONG').length;$('shortCount').textContent=rows.filter(x=>x.signal==='SHORT').length;
+ function render(){
+ const q=$('search').value.trim().toUpperCase();
+ const f=$('filter').value;
+ const s=$('sort').value;
+
+ let arr=rows.filter(r=>
+  (!q||r.symbol.includes(q)||r.base.includes(q))&&
+  (f==='ALL'||(f==='HOT'&&r.hot)||(f===r.signal))
+ );
+
+ arr.sort((a,b)=>
+  s==='change'?b.change-a.change:
+  s==='volume'?b.turnover-a.turnover:
+  s==='symbol'?a.symbol.localeCompare(b.symbol):
+  rank(b)-rank(a)
+ );
+
+ $('rows').innerHTML=arr.length?arr.map(r=>`
+  <tr>
+   <td>
+    <span class="coin">${r.base}</span>
+    <span class="pair">${r.symbol}</span>
+   </td>
+   <td>${fmtPrice(r.price)}</td>
+   <td class="${r.change>=0?'green':'red'}">${pct(r.change)}</td>
+   <td>$${fmtVol(r.turnover)}</td>
+   <td>
+    <span class="${r.e20>r.e50?'green':'red'}">${fmtPrice(r.e20)}</span>
+    /
+    <span>${fmtPrice(r.e50)}</span>
+   </td>
+   <td>
+    ${r.signal==='LONG'
+      ?'<span class="pill long">LONG</span>'
+      :r.signal==='SHORT'
+       ?'<span class="pill short">SHORT</span>'
+       :'<span class="pill wait">WAIT</span>'}
+    ${r.hot?'<span class="pill hot">HOT</span>':''}
+   </td>
+   <td class="green">${fmtPrice(r.entry)}</td>
+   <td class="red">${fmtPrice(r.sl)}</td>
+   <td class="green">${fmtPrice(r.tp1)}</td>
+   <td class="green">${fmtPrice(r.tp2)}</td>
+   <td>${r.detail}</td>
+   <td>
+    <a style="color:#91b9ff"
+     href="https://www.tradingview.com/chart/?symbol=${encodeURIComponent('MEXC:'+r.symbol.replace('_','')+'.P')}&interval=30"
+     target="_blank" rel="noopener">TradingView ↗</a>
+   </td>
+  </tr>
+ `).join(''):'<tr><td colspan="12" class="empty">No coins match this filter.</td></tr>';
+
+ $('total').textContent=rows.length;
+ $('hotCount').textContent=rows.filter(x=>x.hot).length;
+ $('longCount').textContent=rows.filter(x=>x.signal==='LONG').length;
+ $('shortCount').textContent=rows.filter(x=>x.signal==='SHORT').length;
 }
 function rank(r){return (r.signal==='LONG'||r.signal==='SHORT'?10:0)+(r.hot?5:0)}
 async function runScan(){
@@ -156,7 +439,7 @@ async function runScan(){
   // Bounded concurrency avoids flooding public endpoints.
   let idx=0,done=0,fail=0;const workers=Array.from({length:8},async()=>{while(idx<all.length){const x=all[idx++];try{const r=await scanOne(x.c,x.t);if(r){r.hot=hotSet.has(r.symbol);rows.push(r)}}catch(e){fail++}done++;if(done%25===0)$('status').textContent=`Scanning candles… ${done}/${all.length}`;}});
   await Promise.all(workers);render();$('dot').classList.add('live');$('status').textContent=`Scan complete · ${rows.length} contracts with candle data${fail?` · ${fail} skipped`:''}`;$('updated').textContent='Last update: '+new Date().toLocaleString();
- }catch(e){$('status').textContent='Could not load MEXC data: '+e.message;$('rows').innerHTML=`<tr><td colspan="8" class="empty">Could not reach the market-data proxy.<br><br>Check that the Cloudflare Worker URL has been added to index.html and deployed.</td></tr>`}
+ }catch(e){$('status').textContent='Could not load MEXC data: '+e.message;$('rows').innerHTML=`<tr><td colspan="12" class="empty">Could not reach the market-data proxy.<br><br>Check that the Cloudflare Worker URL has been added to index.html and deployed.</td></tr>`}
  finally{busy=false;$('scanBtn').disabled=false}
 }
 function schedule(){if(timer)clearInterval(timer);if(auto)timer=setInterval(runScan,60000)}
